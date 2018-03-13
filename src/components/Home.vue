@@ -5,10 +5,10 @@
       <div class="mdl-cell mdl-cell--6-col mdl-cell--4-col-phone">
         <div v-for="picture in this.pictures" class="image-card" @click="displayDetails(picture.id)">
           <div class="image-card__picture">
-            <img :src="picture.url" />
+            <img :src="picture.data().url"/>
           </div>
           <div class="image-card__comment mdl-card__actions">
-            <span>{{ picture.comment }}</span>
+            <span>{{ picture.data().comment }}</span>
           </div>
         </div>
       </div>
@@ -20,17 +20,23 @@
 </template>
 
 <script>
-  import data from '../data'
+  import database from '../service/firebase'
+
   export default {
     methods: {
-      displayDetails (id) {
-        this.$router.push({name: 'detail', params: { id: id }})
+      displayDetails(id) {
+        this.$router.push({name: 'detail', params: {id: id}})
       }
     },
-    data () {
+    data() {
       return {
-        pictures: data.pictures
+        pictures: []
       }
+    },
+
+    beforeMount() {
+      var _this = this
+      database.read.cat.onSnapshot(cats => {console.log("hello??");_this.pictures = cats.docs})
     }
   }
 </script>
@@ -42,13 +48,16 @@
     bottom: 24px;
     z-index: 998;
   }
+
   .image-card {
     position: relative;
     margin-bottom: 8px;
   }
+
   .image-card__picture > img {
-    width:100%;
+    width: 100%;
   }
+
   .image-card__comment {
     position: absolute;
     bottom: 0;
@@ -57,6 +66,7 @@
     text-align: right;
     background: rgba(0, 0, 0, 0.5);
   }
+
   .image-card__comment > span {
     color: #fff;
     font-size: 14px;
